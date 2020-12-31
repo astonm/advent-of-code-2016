@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -22,7 +21,7 @@ func part1() {
 	c := 0
 	for _, line := range readFile(os.Args[1], "\n") {
 		line = strings.TrimSpace(line)
-		n := regexp.MustCompile(`\d+`).FindAllString(line, -1)
+		n := findAll(`\d+`, line)
 
 		good := true
 		for _, combo := range combos {
@@ -46,7 +45,7 @@ func part2() {
 	var all_nums []int
 
 	for _, line := range readFile(os.Args[1], "no break") {
-		for _, s := range regexp.MustCompile(`\d+`).FindAllString(line, -1) {
+		for _, s := range findAll(`\d+`, line) {
 			all_nums = append(all_nums, atoi(s))
 		}
 

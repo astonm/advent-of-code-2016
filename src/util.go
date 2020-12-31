@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -56,4 +57,8 @@ func (s *Set) has(elm interface{}) bool {
 
 func (s *Set) remove(elm interface{}) {
 	delete(*s, elm)
+}
+
+func findAll(regex, s string) []string {
+	return regexp.MustCompile(regex).FindAllString(s, -1)
 }
