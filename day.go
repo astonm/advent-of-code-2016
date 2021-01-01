@@ -21,7 +21,4 @@ func part1() {
 }
 
 func part2() {
-	for _, line := range readFile(os.Args[1], "\n") {
-		fmt.Println(line)
-	}
 }
