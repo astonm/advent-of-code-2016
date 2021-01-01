@@ -62,3 +62,11 @@ func (s *Set) remove(elm interface{}) {
 func findAll(regex, s string) []string {
 	return regexp.MustCompile(regex).FindAllString(s, -1)
 }
+
+func find(regex, s string) string {
+	all := regexp.MustCompile(regex).FindAllString(s, -1)
+	if len(all) > 0 {
+		return all[0]
+	}
+	return ""
+}
