@@ -75,6 +75,14 @@ func find(regex, s string) string {
 	return ""
 }
 
+func match(regex, s string) []string {
+	m := regexp.MustCompile(regex).FindAllStringSubmatch(s, -1)
+	if len(m) == 0 {
+		return make([]string, 0)
+	}
+	return m[0]
+}
+
 func replaceAll(regex, src, repl string) string {
 	return regexp.MustCompile(regex).ReplaceAllString(src, repl)
 }
@@ -113,4 +121,65 @@ func stringAny(l []string, f func(string) bool) bool {
 		}
 	}
 	return false
+}
+
+type GridCoords struct {
+	Width  int
+	Height int
+}
+
+func (g GridCoords) Size() int {
+	return g.Width * g.Height
+}
+
+func (g GridCoords) At(x, y int) int {
+	if x < 0 || y < 0 || x >= g.Width || y >= g.Height {
+		log.Fatalf("invalid coords (%v, %v)", x, y)
+	}
+	return y*g.Width + x
+}
+
+func (g GridCoords) Adj(x, y int) []int {
+	out := make([]int, 0)
+	if y > 0 {
+		out = append(out, g.At(x, y-1))
+	}
+	if x+1 < g.Width {
+		out = append(out, g.At(x+1, y))
+	}
+	if y+1 < g.Height {
+		out = append(out, g.At(x, y+1))
+	}
+	if x > 0 {
+		out = append(out, g.At(x-1, y))
+	}
+	return out
+}
+
+func (g GridCoords) Around(x, y int) []int {
+	out := make([]int, 0)
+	for dy := -1; dy <= 1; dy++ {
+		for dx := -1; dx <= 1; dx++ {
+			if dx == 0 && dy == 0 {
+				continue
+			}
+			if x+dx >= 0 && x+dx < g.Width && y+dy >= 0 && y+dy < g.Height {
+				out = append(out, g.At(x+dx, y+dy))
+			}
+		}
+	}
+	return out
+}
+
+type Walker func(x int, y int, newRow bool)
+
+func (g GridCoords) Walk(walker Walker) {
+	var newRow bool
+	for y := 0; y < g.Height; y++ {
+		newRow = true
+		for x := 0; x < g.Width; x++ {
+			walker(x, y, newRow)
+			newRow = false
+		}
+	}
 }
