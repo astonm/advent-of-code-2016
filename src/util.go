@@ -74,3 +74,43 @@ func find(regex, s string) string {
 	}
 	return ""
 }
+
+func replaceAll(regex, src, repl string) string {
+	return regexp.MustCompile(regex).ReplaceAllString(src, repl)
+}
+
+func intAll(l []int, f func(int) bool) bool {
+	for _, v := range l {
+		if !f(v) {
+			return false
+		}
+	}
+	return true
+}
+
+func intAny(l []int, f func(int) bool) bool {
+	for _, v := range l {
+		if f(v) {
+			return true
+		}
+	}
+	return false
+}
+
+func stringAll(l []string, f func(string) bool) bool {
+	for _, v := range l {
+		if !f(v) {
+			return false
+		}
+	}
+	return true
+}
+
+func stringAny(l []string, f func(string) bool) bool {
+	for _, v := range l {
+		if f(v) {
+			return true
+		}
+	}
+	return false
+}
