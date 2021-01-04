@@ -183,3 +183,122 @@ func (g GridCoords) Walk(walker Walker) {
 		}
 	}
 }
+
+func irange(start int, end int) []int {
+	out := make([]int, 0, end-start)
+	for i := start; i < end; i++ {
+		out = append(out, i)
+	}
+	return out
+}
+
+func intSliceSelect(src []int, indices []int) []int {
+	out := make([]int, 0, len(indices))
+	for _, idx := range indices {
+		out = append(out, src[idx])
+	}
+	return out
+}
+
+func intSliceRemove(src []int, indices []int) []int {
+	skip := newSet()
+	for _, i := range indices {
+		skip.add(i)
+	}
+
+	out := make([]int, 0, len(indices))
+	for i, v := range src {
+		if !skip.has(i) {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
+func stringSliceSelect(src []string, indices []int) []string {
+	out := make([]string, 0, len(indices))
+	for _, idx := range indices {
+		out = append(out, src[idx])
+	}
+	return out
+}
+
+func stringSliceRemove(src []string, indices []int) []string {
+	skip := newSet()
+	for _, i := range indices {
+		skip.add(i)
+	}
+
+	out := make([]string, 0, len(indices))
+	for i, v := range src {
+		if !skip.has(i) {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
+func combinations(n, r int) <-chan ([]int) {
+	// code borrowed from python's itertools pseudocode:
+	// https://docs.python.org/3/library/itertools.html#itertools.combinations
+	out := make(chan []int)
+	pool := irange(0, n)
+
+	go func() {
+		if r > len(pool) {
+			close(out)
+			return
+		}
+
+		indices := irange(0, r)
+		out <- intSliceSelect(pool, indices)
+
+		for {
+			var i int
+			broken := false
+			for i = r - 1; i >= 0; i-- {
+				if indices[i] != i+n-r {
+					broken = true
+					break
+				}
+			}
+			if !broken {
+				close(out)
+				return
+			}
+
+			indices[i]++
+			for j := i + 1; j < r; j++ {
+				indices[j] = indices[j-1] + 1
+			}
+			out <- intSliceSelect(pool, indices)
+		}
+	}()
+	return out
+}
+
+func allCombinations(n int) <-chan ([]int) {
+	out := make(chan []int)
+	go func() {
+		for r := 1; r <= n; r++ {
+			for v := range combinations(n, r) {
+				out <- v
+			}
+		}
+		close(out)
+	}()
+	return out
+}
+
+func intChainIters(iterators ...<-chan ([]int)) <-chan ([]int) {
+	out := make(chan []int)
+	go func() {
+		for _, iterator := range iterators {
+			for v := range iterator {
+				out <- v
+			}
+		}
+		close(out)
+	}()
+	return out
+}
