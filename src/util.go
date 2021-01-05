@@ -63,6 +63,10 @@ func (s *Set) remove(elm interface{}) {
 	delete(*s, elm)
 }
 
+func (s *Set) len() int {
+	return len(*s)
+}
+
 func findAll(regex, s string) []string {
 	return regexp.MustCompile(regex).FindAllString(s, -1)
 }
