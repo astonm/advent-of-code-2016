@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -21,45 +22,40 @@ func runIt(initialC int) {
 
 	pc := 0
 
-	code := make([]string, 0)
+	code := make([][]string, 0)
 	for _, line := range readFile(os.Args[1], "\n") {
-		code = append(code, line)
+		code = append(code, strings.Split(line, " "))
 	}
 
-	var m []string
 	for pc < len(code) {
 		inst := code[pc]
 
-		m = match(`cpy ([^\s]+) ([^\s]+)`, inst)
-		if len(m) > 0 {
-			if i, err := strconv.Atoi(m[1]); err == nil {
-				regs[m[2]] = i
+		if inst[0] == "cpy" {
+			if i, err := strconv.Atoi(inst[1]); err == nil {
+				regs[inst[2]] = i
 			} else {
-				regs[m[2]] = regs[m[1]]
+				regs[inst[2]] = regs[inst[1]]
 			}
 		}
 
-		m = match(`inc ([^\s]+)`, inst)
-		if len(m) > 0 {
-			regs[m[1]]++
+		if inst[0] == "inc" {
+			regs[inst[1]]++
 		}
 
-		m = match(`dec ([^\s]+)`, inst)
-		if len(m) > 0 {
-			regs[m[1]]--
+		if inst[0] == "dec" {
+			regs[inst[1]]--
 		}
 
-		m = match(`jnz ([^\s]+) ([^\s]+)`, inst)
-		if len(m) > 0 {
+		if inst[0] == "jnz" {
 			var jnzVal int
-			if i, err := strconv.Atoi(m[1]); err == nil {
+			if i, err := strconv.Atoi(inst[1]); err == nil {
 				jnzVal = i
 			} else {
-				jnzVal = regs[m[1]]
+				jnzVal = regs[inst[1]]
 			}
 
 			if jnzVal != 0 {
-				pc += atoi(m[2])
+				pc += atoi(inst[2])
 				continue
 			}
 		}
