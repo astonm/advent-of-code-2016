@@ -67,6 +67,22 @@ func (s *Set) len() int {
 	return len(*s)
 }
 
+func (s *Set) asIntList() []int {
+	out := make([]int, 0)
+	for v := range *s {
+		out = append(out, v.(int))
+	}
+	return out
+}
+
+func (s *Set) asStringList() []string {
+	out := make([]string, 0)
+	for v := range *s {
+		out = append(out, v.(string))
+	}
+	return out
+}
+
 func findAll(regex, s string) []string {
 	return regexp.MustCompile(regex).FindAllString(s, -1)
 }
