@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"math/big"
 	"regexp"
 	"strconv"
 	"strings"
@@ -321,4 +322,28 @@ func intChainIters(iterators ...<-chan ([]int)) <-chan ([]int) {
 		close(out)
 	}()
 	return out
+}
+
+func crt(rems, mods []int64) int64 {
+	// modified from https://rosettacode.org/wiki/Chinese_remainder_theorem#Go
+	p := big.NewInt(1)
+	for _, mod := range mods {
+		p.Mul(p, big.NewInt(mod))
+	}
+
+	out := big.NewInt(0)
+	for i, mod := range mods {
+		n := big.NewInt(mod)
+		q := new(big.Int).Div(p, n)
+
+		s := new(big.Int)
+		gcd := new(big.Int).GCD(nil, s, n, q)
+
+		if gcd.Int64() != 1 {
+			log.Fatalf("%d not coprime", n)
+		}
+
+		out.Add(out, s.Mul(big.NewInt(rems[i]), s.Mul(s, q)))
+	}
+	return out.Mod(out, p).Int64()
 }
