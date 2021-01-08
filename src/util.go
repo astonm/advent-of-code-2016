@@ -355,3 +355,17 @@ func bytesMapFunc(s []byte, f func(int, byte) byte) []byte {
 	}
 	return out
 }
+
+func intMin(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func intMax(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
