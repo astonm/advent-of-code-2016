@@ -8,4 +8,4 @@ fi
 touch "inputs/$DAY.input"
 touch "inputs/$DAY.example"
 
-echo "./run.sh $DAY inputs/$DAY.example"
+echo "./run.sh $DAY example"
