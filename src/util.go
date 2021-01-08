@@ -347,3 +347,11 @@ func crt(rems, mods []int64) int64 {
 	}
 	return out.Mod(out, p).Int64()
 }
+
+func bytesMapFunc(s []byte, f func(int, byte) byte) []byte {
+	out := make([]byte, len(s))
+	for i := 0; i < len(out); i++ {
+		out[i] = f(i, out[i])
+	}
+	return out
+}
