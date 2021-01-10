@@ -369,3 +369,31 @@ func intMax(x, y int) int {
 	}
 	return y
 }
+
+func over(args ...int) <-chan int { // e.g. for x := range over(0, 10)
+	var lower, upper int
+	var step int = 1
+
+	if len(args) == 1 {
+		lower = 0
+		upper = args[0]
+	} else if len(args) == 2 {
+		lower = args[0]
+		upper = args[1]
+	} else if len(args) == 3 {
+		lower = args[0]
+		upper = args[1]
+		step = args[2]
+	} else {
+		log.Fatalf("wrong number of args %d", len(args))
+	}
+
+	out := make(chan int)
+	go func() {
+		for i := lower; i < upper; i += step {
+			out <- i
+		}
+		close(out)
+	}()
+	return out
+}
