@@ -63,23 +63,14 @@ func part2() {
 			return
 		}
 
-		for _, node := range []int{curr.emptyAt, curr.dataAt} {
-			for _, neighbor := range g.Adj(curr.nodes[node].x, curr.nodes[node].y) {
-				nextNodes := make([]Node, len(curr.nodes))
-				copy(nextNodes, curr.nodes)
+		empty := curr.nodes[curr.emptyAt]
+		for _, neighbor := range g.Adj(empty.x, empty.y) {
+			nextNodes := make([]Node, len(curr.nodes))
+			copy(nextNodes, curr.nodes)
 
-				var to, from *Node
-				if curr.nodes[neighbor].used > 0 && curr.nodes[node].free >= curr.nodes[neighbor].used {
-					from = &nextNodes[neighbor]
-					to = &nextNodes[node]
-				} else if curr.nodes[node].used > 0 && curr.nodes[neighbor].free >= curr.nodes[node].used {
-					from = &nextNodes[node]
-					to = &nextNodes[neighbor]
-				}
-
-				if to == nil || from == nil {
-					continue
-				}
+			if curr.nodes[neighbor].used > 0 && empty.free >= curr.nodes[neighbor].used {
+				from := &nextNodes[neighbor]
+				to := &nextNodes[curr.emptyAt]
 
 				to.used += from.used
 				to.free -= from.used
