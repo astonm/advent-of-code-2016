@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+const MaxUint = ^uint(0)
+const MinUint = 0
+const MaxInt = int(MaxUint >> 1)
+const MinInt = -MaxInt - 1
+
 func readFile(path, delim string) []string {
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -160,6 +165,10 @@ func (g GridCoords) At(x, y int) int {
 	return y*g.Width + x
 }
 
+func (g GridCoords) Coords(p int) (int, int) {
+	return p % g.Width, p / g.Width
+}
+
 func (g GridCoords) Adj(x, y int) []int {
 	out := make([]int, 0)
 	if y > 0 {
@@ -205,11 +214,35 @@ func (g GridCoords) Walk(walker Walker) {
 	}
 }
 
-func irange(start int, end int) []int {
-	out := make([]int, 0, end-start)
-	for i := start; i < end; i++ {
-		out = append(out, i)
+func irange(args ...int) []int {
+	var lower, upper int
+	var step int = 1
+
+	if len(args) == 1 {
+		lower = 0
+		upper = args[0]
+	} else if len(args) == 2 {
+		lower = args[0]
+		upper = args[1]
+	} else if len(args) == 3 {
+		lower = args[0]
+		upper = args[1]
+		step = args[2]
+	} else {
+		log.Fatalf("wrong number of args %d", len(args))
 	}
+
+	out := make([]int, 0, (upper-lower)/step)
+	if lower < upper {
+		for i := lower; i < upper; i += step {
+			out = append(out, i)
+		}
+	} else {
+		for i := lower; i > upper; i += step {
+			out = append(out, i)
+		}
+	}
+
 	return out
 }
 
@@ -311,6 +344,46 @@ func allCombinations(n int) <-chan ([]int) {
 	return out
 }
 
+func permutations(n, r int) <-chan ([]int) {
+	// code borrowed from python's itertools pseudocode:
+	// https://docs.python.org/3/library/itertools.html#itertools.permutations
+	out := make(chan []int)
+	pool := irange(0, n)
+
+	go func() {
+		if r > n {
+			close(out)
+			return
+		}
+
+		indices := irange(0, n)
+		cycles := irange(n, n-r, -1)
+		out <- intSliceSelect(pool, indices[:r])
+
+		for n > 0 {
+			broken := false
+			for i := r - 1; i >= 0; i-- {
+				cycles[i] -= 1
+				if cycles[i] == 0 {
+					indices = append(indices[:i], append(indices[i+1:], indices[i])...)
+					cycles[i] = n - i
+				} else {
+					j := cycles[i]
+					indices[i], indices[len(indices)-j] = indices[len(indices)-j], indices[i]
+					out <- intSliceSelect(pool, indices[:r])
+					broken = true
+					break
+				}
+			}
+
+			if !broken {
+				close(out)
+				return
+			}
+		}
+	}()
+	return out
+}
 func intChainIters(iterators ...<-chan ([]int)) <-chan ([]int) {
 	out := make(chan []int)
 	go func() {
